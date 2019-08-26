@@ -1,6 +1,7 @@
 package com.gp.h5game
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -13,47 +14,62 @@ import android.text.TextUtils
 import android.view.View
 import android.webkit.*
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import android.view.animation.AnimationUtils
-import android.R.attr.gravity
-import android.view.animation.Animation
-
+import android.widget.Toast
+import kotlinx.android.synthetic.main.layout_webview.*
+import kotlinx.android.synthetic.main.layout_webview.view.*
+import android.animation.ValueAnimator
+import android.util.Log
+import android.view.animation.LinearInterpolator
 
 class MainActivity : AppCompatActivity() {
 
-    private var firstLoadUrl = ""
-    private var url_load: String? = null
-    var enterAnim: Animation? = null
+    lateinit var firstLoadUrl : String
+    lateinit var url_load : String
+    lateinit var webViewContainer : View
+    lateinit var webview: WebView;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setWebViewConfig(webview, this)
 
+        webViewContainer = layoutInflater.inflate(R.layout.layout_webview, root, true)
+        webview = webViewContainer.webview
+        webview.setBackgroundColor(Color.parseColor("#00000000"));
+//        webview.setBackgroundColor(0); // 设置背景色
+//        webview.getBackground().setAlpha(0);
+    }
+
+    fun initWebView() {
+        setWebViewConfig(webview, this)
         webview.webViewClient = object : WebViewClient() {
 
-            @SuppressLint("NewApi")
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url.toString()
+            override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+            }
+
+            @TargetApi(LOLLIPOP)
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                val url = request.url.toString()
                 if (url.toLowerCase().startsWith("http") || url.toLowerCase().startsWith("https")) {
                     //兼容8.0以上 点击a标签两次跳转不一致
                     if (TextUtils.isEmpty(firstLoadUrl)) {
                         firstLoadUrl = url
                     } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && firstLoadUrl == url) {
+                            Log.e("TAG", "  do not load again  ")
                             return false
                         }
                     }
                     url_load = url
                     //                    WebViewUtil.webviewSyncCookie(url_load, webview);
-                    view?.loadUrl(url_load)
+                    view.loadUrl(url_load)
                     return true
                 }
                 return false
             }
 
 
-            override fun onPageFinished(view: WebView?, url: String?) {
+            override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
                 synchronized(this) {
                     if (webview != null) {
@@ -76,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onLoadResource(view: WebView, url: String) {
                 super.onLoadResource(view, url)
+                //监听url变化
             }
 
             override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
@@ -88,28 +105,82 @@ class MainActivity : AppCompatActivity() {
 
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 if (newProgress == 100) {
-                    //                    progress_bar.setVisibility(View.GONE);
+                    progress.setVisibility(View.GONE);
                 } else {
-                    //                    progress_bar.setVisibility(View.VISIBLE);
-                    //                    progress_bar.setProgress(newProgress);
+                    progress.setVisibility(View.VISIBLE);
+                    progress.setProgress(newProgress);
                 }
                 super.onProgressChanged(view, newProgress)
             }
+
+            override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
+                if (!isFinishing) {
+                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                    result.confirm()
+                }
+                return true
+            }
+
+            override fun onJsConfirm(arg0: WebView, arg1: String, arg2: String, arg3: JsResult): Boolean {
+                if (!isFinishing) {
+                }
+                return true
+            }
         }
-
         url_load = "http://fdrs.kele55.com"
-
-        webview.setBackgroundColor(Color.parseColor("#00000000"));//setBackgroundColor(0);
         webview.loadUrl(url_load)
 
 
-        enterAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_enter)
-        webview.postDelayed(Runnable { webview.startAnimation(enterAnim) }, 5000)
+        val animator = ValueAnimator.ofFloat(webview.height.toFloat(), webview.height / 3 * 2.toFloat())
+        animator.interpolator = LinearInterpolator()
+        animator.setDuration(800).start()
+        animator.addUpdateListener { animation -> webview.setTranslationY(animation.animatedValue as Float) }
 
+//        val enterAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_enter)
+//        enterAnim.setAnimationListener(object : Animation.AnimationListener{
+//            override fun onAnimationStart(animation: Animation?) {
+//            }
+//
+//            override fun onAnimationEnd(animation: Animation?) {
+//               webview.clearAnimation()
+//            }
+//
+//            override fun onAnimationRepeat(animation: Animation?) {
+//            }
+//
+//        })
+//        webview.startAnimation(enterAnim)
     }
 
-    fun onClick(view: View){
-        webview.startAnimation(enterAnim)
+    fun enter(view: View){
+        initWebView()
+    }
+    fun exit(view: View){
+        exitWebview()
+    }
+
+    fun exitWebview(){
+        val animator = ValueAnimator.ofFloat(webview.height / 3 * 2.toFloat(), webview.height.toFloat())
+        animator.interpolator = LinearInterpolator()
+        animator.setDuration(800).start()
+        animator.addUpdateListener { animation -> webview.setTranslationY(animation.animatedValue as Float) }
+
+//        val enterAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_out)
+//        enterAnim.setAnimationListener(object : Animation.AnimationListener{
+//            override fun onAnimationStart(animation: Animation?) {
+//
+//            }
+//
+//            override fun onAnimationEnd(animation: Animation?) {
+//                webview.clearAnimation()
+//                root.removeView(webViewContainer)
+//            }
+//
+//            override fun onAnimationRepeat(animation: Animation?) {
+//
+//            }
+//        })
+//        webview.startAnimation(enterAnim)
     }
 
     fun setWebViewConfig(webview: WebView, mContext: Context): WebView {
