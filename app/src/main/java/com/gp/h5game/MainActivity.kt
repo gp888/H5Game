@@ -19,14 +19,18 @@ import kotlinx.android.synthetic.main.layout_webview.*
 import kotlinx.android.synthetic.main.layout_webview.view.*
 import android.animation.ValueAnimator
 import android.util.Log
+import android.view.Gravity
 import android.view.animation.LinearInterpolator
+import android.widget.AdapterView
+import kotlinx.android.synthetic.main.navigation_header.view.*
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var firstLoadUrl : String
     lateinit var url_load : String
     lateinit var webViewContainer : View
-    lateinit var webview: WebView;
+    lateinit var webview: WebView
+    var gameWindowHeight : Float = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +40,28 @@ class MainActivity : AppCompatActivity() {
         webview = webViewContainer.webview
         webview.setBackgroundColor(Color.parseColor("#00000000"));
 //        webview.setBackgroundColor(0); // 设置背景色
-//        webview.getBackground().setAlpha(0);
+//        webview.getBackground().setAlpfha(0);
+
+
+        drawer.setScrimColor(Color.TRANSPARENT);//去除抽屉划出后内容显示页背景的灰色
+
+        val gameList = listOf(Game("砸金蛋", R.mipmap.ic_launcher),
+            Game("传奇来了", R.mipmap.ic_launcher),Game("浪荡江湖", R.mipmap.ic_launcher),
+            Game("蓄力飞镖", R.mipmap.ic_launcher),Game("捕鱼达人", R.mipmap.ic_launcher))
+
+
+        val grid = navigationView.getHeaderView(0).gridview
+        grid.numColumns = 3
+        grid.adapter = GridAdapter(this, gameList)
+        grid.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            when(position){
+                0 -> {gameWindowHeight = root.height / 3.toFloat()
+                        enter(view)}
+                1 -> {gameWindowHeight = 0f
+                        enter(view)}
+            }
+            drawer.closeDrawer(Gravity.RIGHT)
+        }
     }
 
     fun initWebView() {
@@ -126,61 +151,37 @@ class MainActivity : AppCompatActivity() {
                 }
                 return true
             }
+
+            override fun onReceivedTitle(view: WebView?, title: String?) {
+                super.onReceivedTitle(view, title)
+            }
         }
         url_load = "http://fdrs.kele55.com"
         webview.loadUrl(url_load)
 
 
-        val animator = ValueAnimator.ofFloat(webview.height.toFloat(), webview.height / 3 * 2.toFloat())
+        val animator = ValueAnimator.ofFloat(root.height.toFloat(), gameWindowHeight)
         animator.interpolator = LinearInterpolator()
-        animator.setDuration(800).start()
+        animator.setDuration(600).start()
         animator.addUpdateListener { animation -> webview.setTranslationY(animation.animatedValue as Float) }
-
-//        val enterAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_enter)
-//        enterAnim.setAnimationListener(object : Animation.AnimationListener{
-//            override fun onAnimationStart(animation: Animation?) {
-//            }
-//
-//            override fun onAnimationEnd(animation: Animation?) {
-//               webview.clearAnimation()
-//            }
-//
-//            override fun onAnimationRepeat(animation: Animation?) {
-//            }
-//
-//        })
-//        webview.startAnimation(enterAnim)
     }
 
     fun enter(view: View){
+        if(!edit.text.isBlank()){
+            gameWindowHeight = root.height.toFloat() - java.lang.Float.parseFloat(edit.text.toString())
+        }
         initWebView()
     }
+
     fun exit(view: View){
         exitWebview()
     }
 
     fun exitWebview(){
-        val animator = ValueAnimator.ofFloat(webview.height / 3 * 2.toFloat(), webview.height.toFloat())
+        val animator = ValueAnimator.ofFloat(gameWindowHeight, root.height.toFloat())
         animator.interpolator = LinearInterpolator()
-        animator.setDuration(800).start()
+        animator.setDuration(600).start()
         animator.addUpdateListener { animation -> webview.setTranslationY(animation.animatedValue as Float) }
-
-//        val enterAnim = AnimationUtils.loadAnimation(this, R.anim.bottom_out)
-//        enterAnim.setAnimationListener(object : Animation.AnimationListener{
-//            override fun onAnimationStart(animation: Animation?) {
-//
-//            }
-//
-//            override fun onAnimationEnd(animation: Animation?) {
-//                webview.clearAnimation()
-//                root.removeView(webViewContainer)
-//            }
-//
-//            override fun onAnimationRepeat(animation: Animation?) {
-//
-//            }
-//        })
-//        webview.startAnimation(enterAnim)
     }
 
     fun setWebViewConfig(webview: WebView, mContext: Context): WebView {
