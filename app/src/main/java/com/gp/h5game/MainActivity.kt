@@ -18,6 +18,7 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.layout_webview.*
 import kotlinx.android.synthetic.main.layout_webview.view.*
 import android.animation.ValueAnimator
+import android.support.v4.widget.DrawerLayout
 import android.util.Log
 import android.view.Gravity
 import android.view.animation.LinearInterpolator
@@ -44,6 +45,20 @@ class MainActivity : AppCompatActivity() {
 
 
         drawer.setScrimColor(Color.TRANSPARENT);//去除抽屉划出后内容显示页背景的灰色
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        drawer.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerOpened(drawerView: View) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {}
+        })
 
         val gameList = listOf(Game("砸金蛋", R.mipmap.ic_launcher),
             Game("传奇来了", R.mipmap.ic_launcher),Game("浪荡江湖", R.mipmap.ic_launcher),
@@ -175,6 +190,10 @@ class MainActivity : AppCompatActivity() {
 
     fun exit(view: View){
         exitWebview()
+    }
+
+    fun drawer(view:View){
+        drawer.openDrawer(Gravity.RIGHT)
     }
 
     fun exitWebview(){
