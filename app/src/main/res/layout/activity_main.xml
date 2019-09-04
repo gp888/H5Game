@@ -8,46 +8,41 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-    <android.support.constraint.ConstraintLayout
+    <FrameLayout
             android:id="@+id/root"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
             android:background="@color/colorPrimary">
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="enter"
                 android:onClick="enter"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" android:id="@+id/button"/>
+                android:id="@+id/button"/>
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:text="exit"
                 android:onClick="exit"
-                app:layout_constraintTop_toTopOf="parent" android:id="@+id/button2"
-                app:layout_constraintStart_toEndOf="@+id/button" android:layout_marginStart="8dp"/>
+                android:id="@+id/button2"/>
         <Button
-                android:text="Button"
+                android:text="drawer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="right"
                 android:onClick="drawer"
-                app:layout_constraintTop_toTopOf="parent" android:id="@+id/button3"
-                app:layout_constraintStart_toEndOf="@+id/button2" android:layout_marginStart="8dp"/>
+                android:id="@+id/button3"/>
 
         <EditText
                 android:id="@+id/edit"
                 android:layout_width="wrap_content"
                 android:lines="1"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button"
+                android:layout_marginTop="50dp"
                 android:hint="游戏窗口高度px"/>
 
-
-    </android.support.constraint.ConstraintLayout>
+    </FrameLayout>
 
     <android.support.design.widget.NavigationView
             android:id="@+id/navigationView"

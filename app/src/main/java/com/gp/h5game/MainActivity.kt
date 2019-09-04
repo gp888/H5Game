@@ -60,9 +60,9 @@ class MainActivity : AppCompatActivity() {
             override fun onDrawerStateChanged(newState: Int) {}
         })
 
-        val gameList = listOf(Game("砸金蛋", R.mipmap.ic_launcher),
-            Game("传奇来了", R.mipmap.ic_launcher),Game("浪荡江湖", R.mipmap.ic_launcher),
-            Game("蓄力飞镖", R.mipmap.ic_launcher),Game("捕鱼达人", R.mipmap.ic_launcher))
+        val gameList = listOf(Game("奋斗人生", R.mipmap.ic_launcher),
+            Game("射鸡半屏", R.mipmap.ic_launcher),Game("射鸡全屏", R.mipmap.ic_launcher),
+            Game("原子病毒", R.mipmap.ic_launcher),Game("全屏奋斗", R.mipmap.ic_launcher))
 
 
         val grid = navigationView.getHeaderView(0).gridview
@@ -171,7 +171,8 @@ class MainActivity : AppCompatActivity() {
                 super.onReceivedTitle(view, title)
             }
         }
-        url_load = "http://fdrs.kele55.com"
+        url_load = "http://fdrs.kele55.com"//http://www.zzfriend.com/demo/youxi/m/sheji/game.html
+        //http://fdrs.kele55.com
         webview.loadUrl(url_load)
 
 
@@ -236,6 +237,10 @@ class MainActivity : AppCompatActivity() {
         //支持显示PC宽屏页面的全部内容
         webview.settings.useWideViewPort = true
         webview.settings.loadWithOverviewMode = true
+//        首先阻塞图片，让图片不显示
+//        webview.settings.blockNetworkImage = true;
+//        页面加载好以后，在放开图片：
+//        webview.settings.blockNetworkImage = false;
         return webview
     }
 }
